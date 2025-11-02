@@ -168,7 +168,7 @@ A passionate AI & Tech innovator from Maharashtra, India — working on real-tim
 
 📫 GitHub: Karan-Solanki8695
 
-💬 Telegram: @yourtelegramusername (optional)
+💬 Telegram: @Karanthestudent
 
 ⚖️ License
 
