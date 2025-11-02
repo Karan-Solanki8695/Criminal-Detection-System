@@ -1,0 +1,37 @@
+import time
+import cv2
+from recognizer import load_known_faces, recognize_faces
+
+CRIMINALS_DIR = r"YOUR_FOLDER_PATH_OF_TEST_CRIMINAL_IMAGES" #replace this by your folder path
+
+def main():
+    known_encs, known_names = load_known_faces(CRIMINALS_DIR)
+    print("Loaded encodings:", len(known_encs) if getattr(known_encs,'size',0) else 0)
+    print("Names:", known_names)
+    if len(known_encs) == 0:
+        print("No known face encodings found. Check folder and images.")
+        return
+
+    cap = cv2.VideoCapture(0)
+    time.sleep(0.5)
+    ret, frame = cap.read()
+    cap.release()
+    if not ret or frame is None:
+        print("Cannot read webcam.")
+        return
+
+    scale = 0.5
+    tolerance = 0.6
+
+    locs, names = recognize_faces(frame, known_encs, known_names, scale=scale, model='hog', tolerance=tolerance)
+    print("Detected:", len(locs))
+    for (t, r, b, l), n in zip(locs, names):
+        print(f" - {n} at {(t,r,b,l)}")
+        cv2.rectangle(frame, (l, t), (r, b), (0,255,0) if n!="Unknown" else (0,0,255), 2)
+        cv2.putText(frame, n, (l, max(15, t-10)), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,0) if n!="Unknown" else (0,0,255), 2)
+    cv2.imshow("Diagnosis (5s)", frame)
+    cv2.waitKey(5000)
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()
