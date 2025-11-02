@@ -1,0 +1,42 @@
+import os
+import cv2
+import face_recognition
+
+CRIMINALS_DIR = r"YOUR_FOLDER_PATH"  #replace thisby your folders path
+EXTS = ('.jpg', '.jpeg', '.png', '.bmp')
+
+def check_image(path):
+    img = cv2.imread(path)
+    if img is None:
+        print(f"[debug] cannot open: {path}")
+        return
+    print(f"[debug] file: {path}, shape: {img.shape}, size: {os.path.getsize(path)}")
+    rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    locs = face_recognition.face_locations(rgb, model='hog')
+    print(f"  faces found: {len(locs)}")
+    if locs:
+        for (top,right,bottom,left) in locs:
+            cv2.rectangle(img, (left,top), (right,bottom), (0,255,0), 2)
+    else:
+        cv2.putText(img, "NO FACE FOUND", (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0,0,255), 2)
+    cv2.imshow("debug - press any key", img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+def walk(folder):
+    if not os.path.isdir(folder):
+        print(f"[debug] folder not found: {folder}")
+        return
+    for entry in sorted(os.listdir(folder)):
+        p = os.path.join(folder, entry)
+        if os.path.isfile(p) and entry.lower().endswith(EXTS):
+            print("\n[debug] top-level:", entry)
+            check_image(p)
+        elif os.path.isdir(p):
+            print("\n[debug] subfolder:", entry)
+            for f in sorted(os.listdir(p)):
+                if f.lower().endswith(EXTS):
+                    check_image(os.path.join(p, f))
+
+if __name__ == "__main__":
+    walk(CRIMINALS_DIR)
